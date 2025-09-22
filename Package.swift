@@ -17,7 +17,7 @@ let package = Package(
   targets: [
     .binaryTarget(
       name: "Sentry",
-      url: "https://github.com/exception7601/Sentry/releases/download/8.56.0/Sentry-09cd43e66f8179c8.zip",
+      url: "https://github.com/exception7601/Sentry/releases/download/8.56.0/Sentry-0befb5a378271d8f.zip",
       checksum: "ecc100b59f2044800650f17786c33f071ea580cb318d82e8ce1d403b643555a4"
     )
   ]
