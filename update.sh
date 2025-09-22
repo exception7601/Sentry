@@ -34,6 +34,34 @@ fi
 JSON_CARTHAGE="$(jq --arg version "${VERSION}" --arg url "${DOWNLOAD_URL}" '. + { ($version): $url }' $JSON_FILE)" 
 echo $JSON_CARTHAGE > $JSON_FILE
 
+PACKAGE=$(cat <<END
+// swift-tools-version: 6.0
+
+import PackageDescription
+
+let package = Package(
+  name: "Sentry",
+  platforms: [.iOS(.v12)],
+  products: [
+    .library(
+      name: "Sentry",
+      targets: [
+        "Sentry",
+      ]
+    ),
+  ],
+
+  targets: [
+    .binaryTarget(
+      name: "Sentry",
+      url: "${DOWNLOAD_URL}",
+      checksum: "${SUM}"
+    )
+  ]
+)
+END
+)
+
 NOTES=$(cat <<END
 Carthage
 \`\`\`
@@ -61,8 +89,9 @@ echo "${NOTES}"
 BUILD=$(date +%s)
 NEW_VERSION=${VERSION}
 
+echo "$PACKAGE" > Package.swift
 # echo ${NEW_VERSION} > version
-git add $JSON_FILE
+git add Package.swift $JSON_FILE
 git commit -m "new Version ${NEW_VERSION}"
 git tag -s -a ${NEW_VERSION} -m "v${NEW_VERSION}"
 # git checkout -b release-v${NEW_VERSION}
