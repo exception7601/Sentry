@@ -12,7 +12,7 @@ VERSION=$(gh release list \
   --json tagName -q '.[0].tagName'
 )
 
-if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+if git rev-parse "${VERSION}" >/dev/null 2>&1; then
   echo "Version ${VERSION} already exists. No update needed."
   exit 0
 fi
