@@ -12,18 +12,22 @@ VERSION=$(gh release list \
   --json tagName -q '.[0].tagName'
 )
 
-echo ${VERSION}
+if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+  echo "Version ${VERSION} already exists. No update needed."
+  exit 0
+fi
+
+echo "${VERSION}"
 
 gh release download \
-  ${VERSION} \
+  "${VERSION}" \
   --repo ${REPO} \
   -p ${NAME} \
   -D . \
   -O ${NAME} --clobber
 
-mv $NAME $NEW_NAME
+mv $NAME "$NEW_NAME"
 
-SUM=$(swift package compute-checksum ${NEW_NAME} )
 DOWNLOAD_URL="https://github.com/${MY_REPO}/releases/download/${VERSION}/${NEW_NAME}"
 
 if [ ! -f $JSON_FILE ]; then
@@ -32,35 +36,7 @@ fi
 
 # Make Carthage
 JSON_CARTHAGE="$(jq --arg version "${VERSION}" --arg url "${DOWNLOAD_URL}" '. + { ($version): $url }' $JSON_FILE)" 
-echo $JSON_CARTHAGE > $JSON_FILE
-
-PACKAGE=$(cat <<END
-// swift-tools-version: 6.0
-
-import PackageDescription
-
-let package = Package(
-  name: "Sentry",
-  platforms: [.iOS(.v12)],
-  products: [
-    .library(
-      name: "Sentry",
-      targets: [
-        "Sentry",
-      ]
-    ),
-  ],
-
-  targets: [
-    .binaryTarget(
-      name: "Sentry",
-      url: "${DOWNLOAD_URL}",
-      checksum: "${SUM}"
-    )
-  ]
-)
-END
-)
+echo "$JSON_CARTHAGE" > "$JSON_FILE"
 
 NOTES=$(cat <<END
 Carthage
@@ -72,29 +48,19 @@ Install
 \`\`\`
 carthage bootstrap --use-xcframeworks
 \`\`\`
-
-SPM binaryTarget
-
-\`\`\`
-.binaryTarget(
-  name: "Sentry",
-  url: "${DOWNLOAD_URL}",
-  checksum: "${SUM}"
-)
-\`\`\`
 END
 )
 echo "${NOTES}"
 
-BUILD=$(date +%s)
+# BUILD=$(date +%s)
 NEW_VERSION=${VERSION}
 
-echo "$PACKAGE" > Package.swift
+# echo "$PACKAGE" > Package.swift
 # echo ${NEW_VERSION} > version
-git add Package.swift $JSON_FILE
+git add $JSON_FILE
 git commit -m "new Version ${NEW_VERSION}"
-git tag -s -a ${NEW_VERSION} -m "v${NEW_VERSION}"
+git tag -a "${NEW_VERSION}" -m "v${NEW_VERSION}"
 # git checkout -b release-v${NEW_VERSION}
 git push origin HEAD --tags
 
-gh release create ${NEW_VERSION} ${NEW_NAME} --notes "${NOTES}"
+gh release create "${NEW_VERSION}" "${NEW_NAME}" --notes "${NOTES}"
