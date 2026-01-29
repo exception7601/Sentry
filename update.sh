@@ -1,3 +1,7 @@
+#!/bin/sh
+
+set -e
+
 NAME=Sentry.xcframework.zip
 REPO=getsentry/sentry-cocoa
 MY_REPO=exception7601/Sentry
@@ -57,7 +61,7 @@ NEW_VERSION=${VERSION}
 
 # echo "$PACKAGE" > Package.swift
 # echo ${NEW_VERSION} > version
-git add $JSON_FILE
+git add "$JSON_FILE"
 git commit -m "new Version ${NEW_VERSION}"
 git tag -a "${NEW_VERSION}" -m "v${NEW_VERSION}"
 # git checkout -b release-v${NEW_VERSION}
