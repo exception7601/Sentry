@@ -53,7 +53,8 @@ BUILD=$(date +%s)
 NEW_VERSION=${VERSION}
 
 echo "${NEW_VERSION}.${BUILD}" > version
-git commit -m "new Version ${NEW_VERSION}" --allow-empty
+git add version
+git commit -m "new Version ${NEW_VERSION}"
 git tag -a "${NEW_VERSION}" -m "v${NEW_VERSION}"
 git push origin HEAD --tags
 
