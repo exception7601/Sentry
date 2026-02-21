@@ -20,7 +20,7 @@ if git rev-parse "${VERSION}" >/dev/null 2>&1; then
   exit 0
 fi
 
-echo "${VERSION}"
+echo "Updating to version ${VERSION}..."
 
 gh release download \
   "${VERSION}" \
@@ -29,11 +29,23 @@ gh release download \
   -D . \
   -O ${NAME} --clobber
 
-mv $NAME "$NEW_NAME"
+# Extract and filter platforms
+TMP_DIR=".build"
+rm -rf "$TMP_DIR"
+mkdir -p "$TMP_DIR"
+unzip -qo "$NAME" -d "$TMP_DIR"
+
+# SIMPLE CLEANING: Keep only iOS and Info.plist
+for f in "$TMP_DIR/Sentry.xcframework"/*; do
+  [[ $(basename "$f") =~ ios-|Info.plist ]] || rm -rf "$f"
+done
+
+# Re-zip cleaned content
+(cd "$TMP_DIR" && zip -r "../$NEW_NAME" .)
+rm -rf "$TMP_DIR" "$NAME"
 
 DOWNLOAD_URL="https://github.com/${MY_REPO}/releases/download/${VERSION}/${NEW_NAME}"
-SUM=$(sha256sum "${NEW_NAME}")
-SUM=${SUM%% *}
+SUM=$(sha256sum "${NEW_NAME}" | awk '{print $1}')
 
 NOTES=$(cat <<END
 SPM binaryTarget
