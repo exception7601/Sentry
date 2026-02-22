@@ -38,7 +38,6 @@ find "$ROOT/Sentry.xcframework" -maxdepth 1 -mindepth 1 \
   ! -name "ios-arm64_arm64e" \
   ! -name "ios-arm64_x86_64-simulator" \
   ! -name "Info.plist" \
-  ! -name "_CodeSignature" \
   -exec rm -rf {} +
 
 (cd "$ROOT" && zip -r "../$NEW_NAME" .)
