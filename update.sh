@@ -37,6 +37,7 @@ unzip -qo "$NAME" -d "$ROOT"
 find "$ROOT/Sentry.xcframework" -maxdepth 1 -mindepth 1 \
   ! -name "ios-arm64_arm64e" \
   ! -name "ios-arm64_x86_64-simulator" \
+  ! -name "ios-arm64_x86_64-maccatalyst" \
   ! -name "Info.plist" \
   -exec rm -rf {} +
 
